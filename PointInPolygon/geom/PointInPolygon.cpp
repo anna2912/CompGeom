@@ -20,38 +20,64 @@ bool leftOrientationStrict (int x1, int y1, int x2, int y2, int x3, int y3) {
 	int y;
 };*/
 
-bool BinarySearch(vector <point_type> vertices, point_type pt) {
+bool noSelfCrossings(vector <point_type> vertices) {
     int n = vertices.size();
-	int minInd = 0;
-	for (int i = 1; i < n; i++) {
-		if(vertices[i].x < vertices[minInd].x || vertices[i].x == vertices[minInd].x && vertices[i].y < vertices[minInd].y){
-			minInd = i;
-		}
-	}
-	rotate(vertices.begin(), vertices.begin() + minInd, vertices.end());
+    if (n < 4)
+        return true;
 
-	vector <double> angles(n);
+    for(int i = 0; i <= n - 1; i++) {
+        for(int j = (i + 2) % n; j <= (n+ i - 2) % n; j++) {
+            if(leftOrientationStrict(vertices[i].x,vertices[i].y,vertices[(i+1)%n].x,vertices[(i+1)%n].y,vertices[j].x,vertices[j].y) !=
+                    leftOrientationStrict(vertices[i].x,vertices[i].y,vertices[(i+1)%n].x,vertices[(i+1)%n].y,vertices[(j+1)%n].x,vertices[(j+1)%n].y) &&
+                    leftOrientationStrict(vertices[j].x,vertices[j].y,vertices[(j+1)%n].x,vertices[(j+1)%n].y,vertices[i].x,vertices[i].y) !=
+                    leftOrientationStrict(vertices[j].x,vertices[j].y,vertices[(j+1)%n].x,vertices[(j+1)%n].y,vertices[(i+1)%n].x,vertices[(i+1)%n].y)) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
 
-	for (int i = 1; i < n; i++) {
-		angles[i] = atan2((vertices[i].y - vertices[0].y)*1.0, vertices[i].x - vertices[0].x);
-	}
+bool isConvex(vector <point_type> vertices) {
+    int n = vertices.size();
+    for(int i = 0; i <= n - 1; i++) {
+        int j = (i+1)%n;
+        int k = (i+2)%n;
+        if (!leftOrientationStrict(vertices[i].x,vertices[i].y,vertices[j].x,vertices[j].y,vertices[k].x,vertices[k].y))
+            return false;
+    }
+    return true;
+}
+
+bool BinarySearch(vector <point_type> vertices, point_type pt, bool newPts) {
+    int n = vertices.size();
+
+    if(newPts) {
+        int minInd = 0;
+        for (int i = 1; i < n; i++) {
+            if(vertices[i].x < vertices[minInd].x || vertices[i].x == vertices[minInd].x && vertices[i].y < vertices[minInd].y){
+                minInd = i;
+            }
+        }
+        rotate(vertices.begin(), vertices.begin() + minInd, vertices.end());
+    }
 
 	if (pt.x <  vertices[0].x) {
 		return false;
 	}
 	else {
-		double ptAngle = atan2((pt.y - vertices[0].y)*1.0, pt.x - vertices[0].x);
-		if(ptAngle < angles[1] || ptAngle > angles[n-1]){
-			return false;
-		}
-		else {
+        if(!leftOrientation(vertices[0].x, vertices[0].y, vertices[1].x, vertices[1].y, pt.x, pt.y) ||
+                leftOrientationStrict(vertices[0].x, vertices[0].y, vertices[n-1].x, vertices[n-1].y, pt.x, pt.y)) {
+            return false;
+        }
+        else {
 			int first = 1;
 			int last = n-1;
 			int middle;
 
 			while (first < last - 1) {
 				middle = (first + last) / 2;
-				if (ptAngle < angles[middle])
+                if(!leftOrientation(vertices[0].x, vertices[0].y, vertices[middle].x, vertices[middle].y, pt.x, pt.y))
 				{
 					last = middle;
 				}
@@ -67,7 +93,7 @@ bool BinarySearch(vector <point_type> vertices, point_type pt) {
 			else {
 				return false;
 			}
-		}
+        }
 	}
 }
 
@@ -79,11 +105,13 @@ bool CrossingNumber(vector <point_type> vertices, point_type pt) {
 		if(vertices[i].x == pt.x && vertices[i].y == pt.y) 
 			return true;
 
-		int j = (i + 1) % n;
-		if( (vertices[i].y > pt.y) != (vertices[j].y > pt.y)){
-			if((pt.x - vertices[i].x) * (vertices[j].y - vertices[i].y) == (pt.y - vertices[i].y) * (vertices[j].x - vertices[i].x)) 
-				return true;
-			
+        int j = (i + 1) % n;
+
+        if((pt.x - vertices[i].x) * (vertices[j].y - vertices[i].y) == (pt.y - vertices[i].y) * (vertices[j].x - vertices[i].x))
+            return true;
+
+        if( (vertices[i].y > pt.y) != (vertices[j].y > pt.y)){
+
 			int ind1, ind2;
 			if(vertices[i].y < vertices[j].y) {
 				ind1 = i;

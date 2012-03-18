@@ -7,9 +7,10 @@ namespace algorithms {
 namespace point_in_poly {
 
     using geom::structures::point_type;
-    //using geom::structures::contour_type;
 
-    bool BinarySearch(std::vector <point_type> vertices, point_type pt);
+    bool BinarySearch(std::vector <point_type> vertices, point_type pt, bool newPts);
     bool CrossingNumber(std::vector <point_type> vertices, point_type pt);
+    bool noSelfCrossings(std::vector <point_type> vertices);
+    bool isConvex(std::vector <point_type> vertices);
 
 }}}
