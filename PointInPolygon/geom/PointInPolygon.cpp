@@ -102,13 +102,28 @@ bool CrossingNumber(vector <point_type> vertices, point_type pt) {
 	bool ans = false;
 
 	for (int i = 0; i < n; i++) {
-		if(vertices[i].x == pt.x && vertices[i].y == pt.y) 
-			return true;
 
         int j = (i + 1) % n;
 
-        if((pt.x - vertices[i].x) * (vertices[j].y - vertices[i].y) == (pt.y - vertices[i].y) * (vertices[j].x - vertices[i].x))
-            return true;
+        if(vertices[i].x == vertices[j].x && vertices[i].x == pt.x){
+            if((vertices[i].y >= pt.y) != (vertices[j].y >= pt.y))
+                return true;
+            else
+                return false;
+        }
+
+        if(vertices[i].y == vertices[j].y && vertices[i].y == pt.y){
+            if((vertices[i].x >= pt.x) != (vertices[j].x >= pt.x))
+                return true;
+            else
+                return false;
+        }
+
+        if((pt.x - vertices[i].x) * (vertices[j].y - vertices[i].y) == (pt.y - vertices[i].y) * (vertices[j].x - vertices[i].x)){
+            if((pt.x == vertices[i].x) || ((pt.x - vertices[i].x) > 0 ) == ((vertices[j].x - vertices[i].x) > 0 ) &&
+                    (abs((pt.x - vertices[i].x)) <= abs((vertices[j].x - vertices[i].x))) )
+                return true;
+        }
 
         if( (vertices[i].y > pt.y) != (vertices[j].y > pt.y)){
 
